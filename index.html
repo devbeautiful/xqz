@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<body>
+    <div class="parallax-container">
+        <video autoplay muted loop id="video-background" class="video-background">
+            <source src="/90483efbb731a740ca81389369067bd2_720w.mp4" type="video/mp4">
+            Ваш браузер не поддерживает тег video.
+        </video>
+
+        <div class="cards-wrapper">
+            <div class="music-player">
+                <div class="track-info">
+                    <img id="cover-art" src="https___assets.lareviewofbooks.org_uploads_I-Am-Music (1).jpg" alt="Обложка трека" class="cover-art">
+                    <div class="text-info">
+                        <p id="track-title" class="track-title">CRANK</p>
+                        <p id="track-artist" class="track-artist">Playboi Carti</p>
+                    </div>
+                    <div class="progress-container">
+                        <span class="current-time">0:00</span>
+                        <input type="range" id="progress-bar" min="0" value="0" step="0.1">
+                        <span class="duration">0:00</span>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn prev-btn"><i class="fas fa-backward"></i></button>
+                    <button class="control-btn play-pause-btn"><i class="fas fa-play"></i></button>
+                    <button class="control-btn next-btn"><i class="fas fa-forward"></i></button>
+                </div>
+
+                <audio id="audio-player" preload="auto"></audio>
+            </div>
+
+            <div class="profile-card">
+                <div class="card-header">
+                    <video autoplay muted loop class="banner-video">
+                        <source src="/7125263c797983730b1599697353e6ea.mp4" type="video/mp4">
+                        Ваш браузер не поддерживает видео.
+                    </video>
+                    <img src="b9bb7606770a094f98b57e51799dbe32.jpg" alt="Аватар" class="profile-avatar">
+                </div>
+
+                <div class="card-body">
+                    <h1>beautiful</h1>
+                    <h2>Web Designer</h2>
+                    <p class="bio">
+                        Hi, I'm a web designer passionate about creating beautiful and functional websites. I love combining aesthetics with usability to deliver the best user experience.
+                    </p>
+                </div>
+
+                <div class="card-footer links">
+                    <a href="https://github.com/devbeautiful" target="_blank">
+                        <i class="fab fa-github"></i>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- 0. КОНСТАНТЫ СВАЙПА/TILT И ПЕРЕМЕННЫЕ ---
+
+        // Проверка на мобильное устройство (ширина <= 900px)
+        const isMobile = window.matchMedia("(max-width: 900px)").matches;
+        let isPlayerVisible = false; // Состояние: виден ли медиаплеер (true) или BIO-карточка (false)
+        let touchStartX = 0; // Для отслеживания начальной точки свайпа
+
+        // Элементы для Tilt и Свайпа
+        const cardsWrapper = document.querySelector('.cards-wrapper');
+        const container = document.querySelector('.parallax-container');
+        const videoBackground = document.getElementById('video-background');
+
+        // Параметры Tilt-эффекта (используются только на десктопе)
+        const maxRotate = 25;
+        const maxVideoTranslate = 25;
+
+
+        // --- 1. ПЛЕЙЛИСТ И ПЕРЕМЕННЫЕ МЕДИАПЛЕЕРА ---
+        const playlist = [{
+            title: "CRANK",
+            artist: "Playboi Carti",
+            src: "Playboi_Carti_-_CRANK_79459432.mp3",
+            cover: "https___assets.lareviewofbooks.org_uploads_I-Am-Music (1).jpg"
+        }, {
+            title: "Magnolia",
+            artist: "Playboi Carti",
+            src: "Playboi_Carti_-_Magnolia_48365241.mp3",
+            cover: "59fe9ff933766ccab0f0f80eb2a92dc4.jpg"
+        }, {
+            title: "FE!N",
+            artist: "Travis Scott - FE!N (feat. Playboi Carti)",
+            src: "Travis_Scott_-_FEN_feat_Playboi_Carti_76675522.mp3",
+            cover: "https___images.genius.com_93c577bcd2cce45a2e7063978bcb3b1a.1000x1000x1.png"
+        }];
+
+        let currentTrackIndex = 0;
+
+        const audioPlayer = document.getElementById('audio-player');
+        const playPauseBtn = document.querySelector('.play-pause-btn');
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeDisplay = document.querySelector('.current-time');
+        const durationDisplay = document.querySelector('.duration');
+        const trackTitleDisplay = document.getElementById('track-title');
+        const trackArtistDisplay = document.getElementById('track-artist');
+        const coverArt = document.getElementById('cover-art');
+
+        const playIcon = 'fas fa-play';
+        const pauseIcon = 'fas fa-pause';
+
+        // --- 2. ФУНКЦИИ ПЛЕЙЛИСТА ---
+
+        function loadTrack(index) {
+            const track = playlist[index];
+            audioPlayer.src = track.src;
+            trackTitleDisplay.textContent = track.title;
+            trackArtistDisplay.textContent = track.artist;
+            coverArt.src = track.cover;
+
+            playPauseBtn.querySelector('i').className = playIcon;
+            progressBar.value = 0;
+            currentTimeDisplay.textContent = '0:00';
+            audioPlayer.load();
+        }
+
+        function playNext() {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            loadTrack(currentTrackIndex);
+            audioPlayer.play();
+            playPauseBtn.querySelector('i').className = pauseIcon;
+        }
+
+        function playPrev() {
+            currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+            loadTrack(currentTrackIndex);
+            audioPlayer.play();
+            playPauseBtn.querySelector('i').className = pauseIcon;
+        }
+
+
+        // --- 3. ЛОГИКА МЕДИАПЛЕЕРА И ОБРАБОТЧИКИ СОБЫТИЙ ---
+
+        loadTrack(currentTrackIndex);
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            const formattedSeconds = String(remainingSeconds).padStart(2, '0');
+            return `${minutes}:${formattedSeconds}`;
+        }
+
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            const duration = audioPlayer.duration;
+            progressBar.max = duration;
+            durationDisplay.textContent = formatTime(duration);
+        });
+
+        audioPlayer.addEventListener('timeupdate', () => {
+            const currentTime = audioPlayer.currentTime;
+            if (!isNaN(currentTime)) {
+                progressBar.value = currentTime;
+                currentTimeDisplay.textContent = formatTime(currentTime);
+            }
+        });
+
+        progressBar.addEventListener('input', () => {
+            const seekTime = progressBar.value;
+            audioPlayer.currentTime = seekTime;
+        });
+
+        playPauseBtn.addEventListener('click', () => {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playPauseBtn.querySelector('i').className = pauseIcon;
+            } else {
+                audioPlayer.pause();
+                playPauseBtn.querySelector('i').className = playIcon;
+            }
+        });
+
+        audioPlayer.addEventListener('ended', playNext);
+        prevBtn.addEventListener('click', playPrev);
+        nextBtn.addEventListener('click', playNext);
+
+
+        // --- 4. ЛОГИКА АДАПТАЦИИ (TILT vs СВАЙП) ---
+
+        // Функция для переключения карточек на мобильном
+        function switchCards() {
+            if (isPlayerVisible) {
+                // Показываем плеер (сдвигаем cardsWrapper на 0)
+                cardsWrapper.style.left = '0';
+            } else {
+                // Показываем BIO-карточку (сдвигаем cardsWrapper на -100vw)
+                cardsWrapper.style.left = '-100vw';
+            }
+        }
+
+        if (isMobile) {
+            // --- 4.1. Мобильная логика (СВАЙП) ---
+
+            // Инициализация: BIO-карточка видна (сдвиг влево на 100vw)
+            cardsWrapper.style.left = '-100vw';
+            isPlayerVisible = false;
+
+            // Применяем transition только для свойства 'left' (определено в CSS)
+            cardsWrapper.style.transition = 'left 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+
+            container.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            }, {
+                passive: true
+            });
+
+            container.addEventListener('touchend', (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const threshold = 50; // Минимальное смещение для свайпа
+
+                const deltaX = touchEndX - touchStartX;
+
+                if (Math.abs(deltaX) > threshold) {
+                    if (deltaX < 0) {
+                        // Свайп влево (показываем Плеер)
+                        if (!isPlayerVisible) {
+                            isPlayerVisible = true;
+                            switchCards();
+                        }
+                    } else {
+                        // Свайп вправо (показываем BIO-карточку)
+                        if (isPlayerVisible) {
+                            isPlayerVisible = false;
+                            switchCards();
+                        }
+                    }
+                }
+            });
+
+        } else {
+            // --- 4.2. Десктопная логика (TILT) ---
+
+            // Устанавливаем начальный сдвиг влево
+            cardsWrapper.style.transform = 'translateX(var(--horizontal-offset))';
+            cardsWrapper.style.transition = 'transform 0.25s ease-out';
+
+            // Обработчик Tilt для десктопа
+            const handleDesktopTilt = (e) => {
+                let rect = container.getBoundingClientRect();
+
+                let mouseX = (e.clientX - rect.left) / rect.width - 0.5;
+                let mouseY = (e.clientY - rect.top) / rect.height - 0.5;
+
+                let rotateX = mouseY * maxRotate * -1;
+                let rotateY = mouseX * maxRotate;
+
+                // Применяем и горизонтальный сдвиг, и Tilt
+                const tiltTransform = `translateX(var(--horizontal-offset)) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+                cardsWrapper.style.transform = tiltTransform;
+
+                const videoTranslateX = mouseX * maxVideoTranslate;
+                const videoTranslateY = mouseY * maxVideoTranslate;
+                videoBackground.style.transform =
+                    `translate(calc(-50% + ${videoTranslateX}px), calc(-50% + ${videoTranslateY}px))`;
+            };
+
+            // Обработчик сброса Tilt для десктопа
+            const handleDesktopReset = () => {
+                // Сбрасываем Tilt, сохраняя горизонтальный сдвиг
+                cardsWrapper.style.transform = 'translateX(var(--horizontal-offset)) rotateX(0deg) rotateY(0deg)';
+                videoBackground.style.transform = 'translate(-50%, -50%)';
+            };
+
+            container.addEventListener('mousemove', handleDesktopTilt);
+            container.addEventListener('mouseleave', handleDesktopReset);
+        }
+    </script>
+</body>
+
+</html>
