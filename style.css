@@ -12,7 +12,7 @@
     --border-radius: 20px;
     --gap-spacing: 40px;
     /* Отступ между карточками */
-    --horizontal-offset: -150px;
+    --horizontal-offset: -200px;
 }
 
 body {
