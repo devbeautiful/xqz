@@ -67,19 +67,15 @@
         </div>
     </div>
     <script>
-        // --- 0. КОНСТАНТЫ СВАЙПА/TILT И ПЕРЕМЕННЫЕ ---
-
+        // --- 0. КОНСТАНТЫ TILT И ПЕРЕМЕННЫЕ ---
         // Проверка на мобильное устройство (ширина <= 900px)
         const isMobile = window.matchMedia("(max-width: 900px)").matches;
-        let isPlayerVisible = false; // Состояние: виден ли медиаплеер (true) или BIO-карточка (false)
-        let touchStartX = 0; // Для отслеживания начальной точки свайпа
 
-        // Элементы для Tilt и Свайпа
+        // Элементы для Tilt
         const cardsWrapper = document.querySelector('.cards-wrapper');
         const container = document.querySelector('.parallax-container');
         const videoBackground = document.getElementById('video-background');
 
-        // Параметры Tilt-эффекта (используются только на десктопе)
         const maxRotate = 25;
         const maxVideoTranslate = 25;
 
@@ -193,66 +189,14 @@
         nextBtn.addEventListener('click', playNext);
 
 
-        // --- 4. ЛОГИКА АДАПТАЦИИ (TILT vs СВАЙП) ---
+        // --- 4. ЛОГИКА АДАПТАЦИИ (TILT) ---
 
-        // Функция для переключения карточек на мобильном
-        function switchCards() {
-            if (isPlayerVisible) {
-                // Показываем плеер (сдвигаем cardsWrapper на 0)
-                cardsWrapper.style.left = '0';
-            } else {
-                // Показываем BIO-карточку (сдвигаем cardsWrapper на -100vw)
-                cardsWrapper.style.left = '-100vw';
-            }
-        }
+        if (!isMobile) {
+            // --- 4.1. Десктопная логика (TILT) ---
 
-        if (isMobile) {
-            // --- 4.1. Мобильная логика (СВАЙП) ---
-
-            // Инициализация: BIO-карточка видна (сдвиг влево на 100vw)
-            cardsWrapper.style.left = '-100vw';
-            isPlayerVisible = false;
-
-            // Применяем transition только для свойства 'left' (определено в CSS)
-            cardsWrapper.style.transition = 'left 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-
-            container.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-            }, {
-                passive: true
-            });
-
-            container.addEventListener('touchend', (e) => {
-                const touchEndX = e.changedTouches[0].clientX;
-                const threshold = 50; // Минимальное смещение для свайпа
-
-                const deltaX = touchEndX - touchStartX;
-
-                if (Math.abs(deltaX) > threshold) {
-                    if (deltaX < 0) {
-                        // Свайп влево (показываем Плеер)
-                        if (!isPlayerVisible) {
-                            isPlayerVisible = true;
-                            switchCards();
-                        }
-                    } else {
-                        // Свайп вправо (показываем BIO-карточку)
-                        if (isPlayerVisible) {
-                            isPlayerVisible = false;
-                            switchCards();
-                        }
-                    }
-                }
-            });
-
-        } else {
-            // --- 4.2. Десктопная логика (TILT) ---
-
-            // Устанавливаем начальный сдвиг влево
             cardsWrapper.style.transform = 'translateX(var(--horizontal-offset))';
-            cardsWrapper.style.transition = 'transform 0.25s ease-out';
+            // cardsWrapper.style.transition уже задан в CSS
 
-            // Обработчик Tilt для десктопа
             const handleDesktopTilt = (e) => {
                 let rect = container.getBoundingClientRect();
 
@@ -262,7 +206,6 @@
                 let rotateX = mouseY * maxRotate * -1;
                 let rotateY = mouseX * maxRotate;
 
-                // Применяем и горизонтальный сдвиг, и Tilt
                 const tiltTransform = `translateX(var(--horizontal-offset)) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
                 cardsWrapper.style.transform = tiltTransform;
@@ -273,9 +216,7 @@
                     `translate(calc(-50% + ${videoTranslateX}px), calc(-50% + ${videoTranslateY}px))`;
             };
 
-            // Обработчик сброса Tilt для десктопа
             const handleDesktopReset = () => {
-                // Сбрасываем Tilt, сохраняя горизонтальный сдвиг
                 cardsWrapper.style.transform = 'translateX(var(--horizontal-offset)) rotateX(0deg) rotateY(0deg)';
                 videoBackground.style.transform = 'translate(-50%, -50%)';
             };
@@ -283,6 +224,7 @@
             container.addEventListener('mousemove', handleDesktopTilt);
             container.addEventListener('mouseleave', handleDesktopReset);
         }
+        // Блок else для isMobile удален, так как мы используем CSS-скролл
     </script>
 </body>
 
