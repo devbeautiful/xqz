@@ -8,11 +8,11 @@
     --shadow-dark: rgba(0, 0, 0, 0.8);
     --card-width: 400px;
     --card-height: 550px;
+    /* Важно: эта высота используется для расчета центрирования */
     --border-radius: 20px;
     --gap-spacing: 40px;
     /* Отступ между карточками */
-    /* ИСПРАВЛЕНИЕ: Добавлена переменная для сдвига влево */
-    --horizontal-offset: -200px;
+    --horizontal-offset: -150px;
 }
 
 body {
@@ -25,10 +25,7 @@ body {
 }
 
 
-/* --- 2. Контейнер Параллакса (ИСПРАВЛЕНО ДЛЯ ЦЕНТРИРОВАНИЯ) --- */
-
-
-/* --- 2. Контейнер Параллакса (ИСПРАВЛЕНО ДЛЯ СДВИГА ВЛЕВО) --- */
+/* --- 2. Контейнер Параллакса --- */
 
 .parallax-container {
     position: relative;
@@ -43,32 +40,23 @@ body {
 }
 
 
-/* Добавляем новый контейнер для центрирования и сдвига группы карточек */
-
-
-/* Этот контейнер будет двигаться, а фон останется неподвижным */
+/* Контейнер для центрирования и сдвига группы карточек (для Tilt) */
 
 .cards-wrapper {
     display: flex;
-    /* Чтобы карточки были рядом */
     justify-content: center;
-    /* Центрируем карточки внутри этого враппера */
     align-items: center;
-    /* Применяем сдвиг к этому врапперу */
     transform: translateX(var(--horizontal-offset));
     z-index: 10;
-    /* Убедимся, что враппер находится над фоном */
     position: relative;
-    /* Для правильного z-index */
-    /* КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Даем ему 3D-контекст */
     transform-style: preserve-3d;
+    /* ИСПРАВЛЕНИЕ TILT: Добавляем плавность для десктопа */
+    transition: transform 0.25s ease-out;
+    will-change: transform;
 }
 
 
-/* --- Остальные стили .music-player и .profile-card остаются без изменений, чтобы сохранить Tilt и Centering внутри группы. --- */
-
-
-/* Виньетка: затемнение по краям */
+/* --- Виньетка: затемнение по краям --- */
 
 .parallax-container::before {
     content: '';
@@ -96,9 +84,9 @@ body {
     height: auto;
     z-index: 1;
     /* Фон должен быть ниже карточек */
-    filter: brightness(0.25);
+    filter: brightness(0.5);
     will-change: transform;
-    transition: transform 1s linear;
+    transition: transform 0.1s linear;
 }
 
 
@@ -113,17 +101,18 @@ body {
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: 0 30px 60px var(--shadow-dark);
-    /* Transition управляется JS */
     padding-bottom: 20px;
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.1);
     /* Отступ от плеера */
     margin-left: calc(var(--gap-spacing) / 2);
     will-change: transform;
+    /* ИСПРАВЛЕНИЕ TILT: Добавляем плавность для десктопа */
+    transition: transform 0.25s ease-out;
 }
 
 
-/* --- 5, 6, 7. Стили Header, Body, Footer (Без изменений) --- */
+/* --- 5, 6, 7. Стили Header, Body, Footer --- */
 
 .card-header {
     position: relative;
@@ -175,33 +164,35 @@ body {
 }
 
 .card-footer.links {
-    margin-top: 50px;
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
 }
 
 .links a {
-    display: inline-block;
-    margin: 0 10px;
-    opacity: 0.7;
-    transition: opacity 0.2s, transform 0.2s;
-    filter: invert(1);
-    scale: 200%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    margin: 0 8px;
+    color: var(--text-light);
+    transition: color 0.3s, transform 0.3s;
 }
 
 .links a:hover {
-    opacity: 1;
-    transform: scale(1.2);
+    color: var(--text-accent);
+    transform: scale(1.15);
 }
 
-.links img {
-    width: 30px;
-    height: 30px;
+.links a i {
+    font-size: 1.8em;
 }
 
 
-/* --- 8. Стили Медиаплеера (Как "Парная Карточка" с Tilt) --- */
+/* --- 8. Стили Медиаплеера --- */
 
 .music-player {
-    /* КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Удаляем устаревшие абсолютные стили */
     position: relative;
     left: auto;
     top: auto;
@@ -223,10 +214,12 @@ body {
     /* Отступ от BIO-карточки */
     margin-right: calc(var(--gap-spacing) / 2);
     will-change: transform;
+    /* ИСПРАВЛЕНИЕ TILT: Добавляем плавность для десктопа */
+    transition: transform 0.25s ease-out;
 }
 
 
-/* Стили элементов плеера (Обложка, Прогресс и Кнопки) - Без изменений, кроме размера cover-art */
+/* Стили элементов плеера */
 
 .track-info {
     display: flex;
@@ -362,75 +355,52 @@ body {
 }
 
 
-/* --- 9. Адаптация для мобильных устройств (Новая логика свайпа) --- */
+/* --- 9. Адаптация для мобильных устройств (ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ) --- */
 
 @media (max-width: 900px) {
-    /* --- Стили для контейнера свайпа --- */
     .parallax-container {
-        /* Высота 100vh, но без горизонтального переполнения */
-        overflow-x: hidden;
+        transform: none;
+        /* КЛЮЧЕВОЕ: Контент начинается сверху, чтобы calc() работал */
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
         overflow-y: auto;
         padding-top: 0;
-        transform: none;
-    }
-    /* --- Контейнер для двух свайпаемых карточек --- */
-    .cards-wrapper {
-        /* Сброс сдвига влево и TILT-стилей */
-        transform: translateX(0) !important;
-        transform-style: flat;
-        position: relative;
-        z-index: 10;
-        /* КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Горизонтальный Flexbox и ширина, вмещающая 2 карточки */
-        display: flex;
-        flex-direction: row;
-        width: 200vw;
-        /* 200% ширины, чтобы вместить обе карточки рядом */
         height: 100vh;
-        /* Начальный сдвиг, чтобы BIO-карточка была видна, а плеер - скрыт */
-        left: -100vw;
-        /* Плавность сдвига */
-        transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    /* --- Стили для каждой карточки на мобильном --- */
+    .cards-wrapper {
+        transform: translateX(0);
+        flex-direction: column;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+    }
     .music-player,
     .profile-card {
-        width: 100vw;
-        /* Каждая карточка занимает 100% ширины экрана */
-        height: 100vh;
-        /* Каждая карточка занимает 100% высоты экрана */
-        flex-shrink: 0;
-        /* Запрещаем карточкам сжиматься */
-        margin: 0;
-        /* Удаляем все внешние отступы */
-        border-radius: 0;
-        /* Без скругления углов для полного экрана */
-        box-shadow: none;
-        /* Убираем тени для лучшего свайпа */
-        /* Внутренние отступы для контента */
-        padding: 40px 20px;
-        box-sizing: border-box;
+        width: min(90vw, var(--card-width));
+        height: auto;
+        margin: 0 auto;
+        /* Горизонтальное центрирование */
+        padding-bottom: 20px;
+        /* Отключаем Tilt-транзишн на мобильном */
+        transition: none;
+        will-change: auto;
     }
-    /* Убедимся, что обложка плеера имеет максимальный размер */
+    /* КЛЮЧЕВОЕ ЦЕНТРИРОВАНИЕ: BIO-карточка при загрузке */
+    .profile-card {
+        order: 1;
+        /* margin-top = (100vh - card-height) / 2. 550px / 2 = 275px. */
+        margin-top: calc(50vh - 275px);
+        margin-bottom: 40px;
+        /* Отступ до медиаплеера */
+    }
+    /* Отступ снизу, чтобы медиаплеер можно было прокрутить в центр экрана */
+    .music-player {
+        order: 2;
+        margin-bottom: calc(50vh - 275px);
+    }
     .music-player .cover-art {
-        width: 80vw;
-        max-width: 350px;
-    }
-    /* Дополнительные стили, чтобы скрыть лишнее */
-    .parallax-container::before {
-        display: none;
-        /* Убираем виньетку */
-    }
-    .video-background {
-        /* Фоновое видео должно быть зафиксировано */
-        position: fixed;
-    }
-    .profile-card .card-header {
-        height: 100px;
-        margin-bottom: 50px;
-    }
-    .profile-card .profile-avatar {
-        bottom: -40px;
-        width: 80px;
-        height: 80px;
+        width: 80%;
+        max-width: 250px;
     }
 }
